@@ -14,13 +14,9 @@
 const char* ssid     = "yagayuga"; //enter your ssid/ wi-fi(case sensitiv) router name - 2.4 Ghz only
 const char* password = "1815wnaranjaave";     // enter ssid password (case sensitiv)
 char host[] = "smarthomeiot.herokuapp.com"; //enter your Heroku domain name like "espiot.herokuapp.com" 
-int sensor_distance_from_door = 5; // enter the distance in inches between you ultrasonic sensor and garage door
-// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-//Firstly the connections of ultrasonic Sensor.Connect 3.9v to +5v and GND. Trigger pin to 5 & echo pin to 4. 
-#define trigPin 5
-#define echoPin 4
-int duration, distance;
-const int relayPin1 = 16; //Garage door 1
+
+int switchPin1 = 5; //light switch
+const int relayPin1 = 3; //Garage door 1
 int pingCount = 0;
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -50,21 +46,14 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
             
         case WStype_TEXT:
             Serial.println("Got data");
-            //Serial.println("looping...");
-            digitalWrite(trigPin, HIGH);
-            delayMicroseconds(10);
-            digitalWrite(trigPin, LOW);
-            duration = pulseIn(echoPin, HIGH);
-            distance = (duration/2) / 74; //Inches
-            distance = (duration/2) / 29.1; //centimeter
-            
-            if (distance <= sensor_distance_from_door ){
+       
+            if (switchPin1 = 1){
               //Serial.print(distance);
-              currState = "open";
+              currState = "on";
               //Serial.println(currState);
             }else{
               //Serial.println(currState);
-              currState = "close";
+              currState = "off";
             }
             
             processWebScoketRequest((char*)payload);
@@ -85,9 +74,7 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
 void setup() {
     Serial.begin(115200);
 
-    pinMode(trigPin, OUTPUT); 
-    pinMode(echoPin, INPUT);
-
+    pinMode(switchPin1, INPUT); 
     
     Serial.setDebugOutput(true);
     
@@ -146,33 +133,33 @@ void processWebScoketRequest(String data){
 
             if(query == "?"){ //if command then execute
               Serial.println("Recieved query!");
-                 if(currState=="open"){
-                      message = "open";
+                 if(currState=="on"){
+                      message = "running";
                     }else{
-                      message = "closed";
+                      message = "not running";
                     }
-                   jsonResponse.replace("<text>", "Garage door " + instance + " is " + message );
+                   jsonResponse.replace("<text>", "Roomba " + instance + " is " + message );
                    webSocket.sendTXT(jsonResponse);
                    
             }else if(query == "cmd"){ //if query check state
               Serial.println("Recieved command!");
                    if(state != currState){
-                         if(currState == "close"){
-                            message = "opening";
+                         if(currState == "off"){
+                            message = "running";
                           }else{
-                            message = "closing";
+                            message = "not running";
                           }
                           digitalWrite(relayPin1, HIGH);
                           delay(1000);
                           digitalWrite(relayPin1, LOW);
                    }else{
-                          if(currState == "close"){
-                            message = "already closed";
+                          if(currState == "off"){
+                            message = "not currently running";
                           }else{
-                            message = "already open";
+                            message = "already running";
                           }
                     }
-                  jsonResponse.replace("<text>", "Garage door " + instance + " is " + message );
+                  jsonResponse.replace("<text>", "Roomba " + instance + " is " + message );
                   webSocket.sendTXT(jsonResponse);
 
             
