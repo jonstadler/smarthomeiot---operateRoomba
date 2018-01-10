@@ -1,3 +1,6 @@
+original by Nassir-Malik
+i am learning how all this works
+
 # IOT-ESP8266-Alexa_Skills_Garage_Door
 
 Youtube tutorial https://www.youtube.com/playlist?list=PLYvhGlBkeltkMOW5gV37hKd2nmgLuuRt7
